@@ -63,9 +63,9 @@ func killServer(ctx context.Context) {
 func main() {
 	runDB()
 
-	ctx := context.Background()
-	defer killServer(ctx)
-	runServer(ctx)
+	//ctx := context.Background()
+	//defer killServer(ctx)
+	//runServer(ctx)
 
 	// Run some tests with the client
 	cli, err := social_graph_client.NewClient("localhost:9090")

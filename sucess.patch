@@ -1,0 +1,78 @@
+diff --git a/cmd/social_graph_service_e2e/social_graph_service_e2e.go b/cmd/social_graph_service_e2e/social_graph_service_e2e.go
+index a38d343..8507942 100644
+--- a/cmd/social_graph_service_e2e/social_graph_service_e2e.go
++++ b/cmd/social_graph_service_e2e/social_graph_service_e2e.go
+@@ -63,9 +63,9 @@ func killServer(ctx context.Context) {
+ func main() {
+ 	runDB()
+ 
+-	ctx := context.Background()
+-	defer killServer(ctx)
+-	runServer(ctx)
++	//ctx := context.Background()
++	//defer killServer(ctx)
++	//runServer(ctx)
+ 
+ 	// Run some tests with the client
+ 	cli, err := social_graph_client.NewClient("localhost:9090")
+diff --git a/go.mod b/go.mod
+index 292e9bf..cd0f8e9 100644
+--- a/go.mod
++++ b/go.mod
+@@ -1,22 +1,38 @@
+ module github.com/the-gigi/delinkcious
+ 
++go 1.19
++
+ require (
+ 	github.com/Masterminds/squirrel v0.0.0-20181030160206-3ba160b0147f
+-	github.com/davecgh/go-spew v1.1.1 // indirect
+ 	github.com/go-kit/kit v0.8.0
++	github.com/gorilla/mux v1.6.2
++	github.com/lib/pq v1.10.9
++	github.com/onsi/ginkgo v1.6.0
++	github.com/onsi/gomega v1.4.2
++)
++
++require (
++	github.com/davecgh/go-spew v1.1.1 // indirect
++	github.com/fsnotify/fsnotify v1.4.7 // indirect
+ 	github.com/go-logfmt/logfmt v0.4.0 // indirect
+ 	github.com/go-sql-driver/mysql v1.4.1 // indirect
+ 	github.com/go-stack/stack v1.8.0 // indirect
++	github.com/golang/protobuf v1.2.0 // indirect
+ 	github.com/gorilla/context v1.1.1 // indirect
+-	github.com/gorilla/mux v1.6.2
++	github.com/hpcloud/tail v1.0.0 // indirect
++	github.com/kr/logfmt v0.0.0-20140226030751-b84e30acd515 // indirect
+ 	github.com/lann/builder v0.0.0-20180802200727-47ae307949d0 // indirect
+ 	github.com/lann/ps v0.0.0-20150810152359-62de8c46ede0 // indirect
+-	github.com/lib/pq v1.0.0
+ 	github.com/mattn/go-sqlite3 v1.10.0 // indirect
+-	github.com/onsi/ginkgo v1.6.0
+-	github.com/onsi/gomega v1.4.2
+ 	github.com/pmezard/go-difflib v1.0.0 // indirect
+ 	github.com/stretchr/testify v1.2.2 // indirect
++	golang.org/x/net v0.0.0-20180906233101-161cd47e91fd // indirect
++	golang.org/x/sync v0.0.0-20180314180146-1d60e4601c6f // indirect
+ 	golang.org/x/sys v0.0.0-20181116161606-93218def8b18 // indirect
++	golang.org/x/text v0.3.0 // indirect
+ 	google.golang.org/appengine v1.3.0 // indirect
++	gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405 // indirect
++	gopkg.in/fsnotify.v1 v1.4.7 // indirect
++	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect
++	gopkg.in/yaml.v2 v2.2.1 // indirect
+ )
+diff --git a/go.sum b/go.sum
+index 702ec95..22cd37b 100644
+--- a/go.sum
++++ b/go.sum
+@@ -28,6 +28,8 @@ github.com/lann/ps v0.0.0-20150810152359-62de8c46ede0 h1:P6pPBnrTSX3DEVR4fDembhR
+ github.com/lann/ps v0.0.0-20150810152359-62de8c46ede0/go.mod h1:vmVJ0l/dxyfGW6FmdpVm2joNMFikkuWg0EoCKLGUMNw=
+ github.com/lib/pq v1.0.0 h1:X5PMW56eZitiTeO7tKzZxFCSpbFZJtkMMooicw2us9A=
+ github.com/lib/pq v1.0.0/go.mod h1:5WUZQaWbwv1U+lTReE5YruASi9Al49XbQIvNi/34Woo=
++github.com/lib/pq v1.10.9 h1:YXG7RB+JIjhP29X+OtkiDnYaXQwpS4JEWq7dtCCRUEw=
++github.com/lib/pq v1.10.9/go.mod h1:AlVN5x4E4T544tWzH6hKfbfQvm3HdbOxrmggDNAPY9o=
+ github.com/mattn/go-sqlite3 v1.10.0 h1:jbhqpg7tQe4SupckyijYiy0mJJ/pRyHvXf7JdWK860o=
+ github.com/mattn/go-sqlite3 v1.10.0/go.mod h1:FPy6KqzDD04eiIsT53CuJW3U88zkxoIYsOqkbpncsNc=
+ github.com/onsi/ginkgo v1.6.0 h1:Ix8l273rp3QzYgXSR+c8d1fTG7UPgYkOSELPhiY/YGw=
