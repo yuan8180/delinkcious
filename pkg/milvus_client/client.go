@@ -1,4 +1,4 @@
-package social_graph_client
+package milvus_client
 
 import (
 	"bytes"
