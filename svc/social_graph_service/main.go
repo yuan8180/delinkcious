@@ -1,6 +1,6 @@
 package main
 
-import "github.com/the-gigi/delinkcious/svc/social_graph_service/service"
+import "github.com/yuan8180/delinkcious/svc/social_graph_service/service"
 
 func main() {
 	service.Run()

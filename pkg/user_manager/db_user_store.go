@@ -3,11 +3,12 @@ package user_manager
 import (
 	"database/sql"
 	"fmt"
-	sq "github.com/Masterminds/squirrel"
-	_ "github.com/lib/pq"
-	om "github.com/the-gigi/delinkcious/pkg/object_model"
 	"math/rand"
 	"strconv"
+
+	sq "github.com/Masterminds/squirrel"
+	_ "github.com/lib/pq"
+	om "github.com/yuan8180/delinkcious/pkg/object_model"
 )
 
 type DbUserStore struct {

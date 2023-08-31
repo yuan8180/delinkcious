@@ -20,7 +20,7 @@ index 292e9bf..cd0f8e9 100644
 --- a/go.mod
 +++ b/go.mod
 @@ -1,22 +1,38 @@
- module github.com/the-gigi/delinkcious
+ module github.com/yuan8180/delinkcious
  
 +go 1.19
 +

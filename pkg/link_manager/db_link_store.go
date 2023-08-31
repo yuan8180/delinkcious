@@ -3,10 +3,12 @@ package link_manager
 import (
 	"errors"
 	"fmt"
-	om "github.com/the-gigi/delinkcious/pkg/object_model"
 	"time"
 
+	om "github.com/yuan8180/delinkcious/pkg/object_model"
+
 	"database/sql"
+
 	sq "github.com/Masterminds/squirrel"
 	_ "github.com/lib/pq"
 )

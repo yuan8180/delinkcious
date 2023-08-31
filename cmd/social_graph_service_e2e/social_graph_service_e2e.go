@@ -4,11 +4,12 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	_ "github.com/lib/pq"
-	"github.com/the-gigi/delinkcious/pkg/social_graph_client"
 	"log"
 	"os"
 	"os/exec"
+
+	_ "github.com/lib/pq"
+	"github.com/yuan8180/delinkcious/pkg/social_graph_client"
 )
 
 func check(err error) {

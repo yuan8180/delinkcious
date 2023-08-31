@@ -30,3 +30,10 @@ type LinkManagerEvents interface {
 	OnLinkUpdated(username string, link *Link)
 	OnLinkDeleted(username string, url string)
 }
+
+type MilvusManager interface {
+	CreateCollection(collname string) error
+	DropCollection(collname string) error
+	ListCollections() ([]string, error)
+	HasCollection(collname string) (bool, error)
+}

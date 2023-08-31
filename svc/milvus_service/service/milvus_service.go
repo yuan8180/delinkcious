@@ -2,11 +2,12 @@ package service
 
 import (
 	"errors"
-	httptransport "github.com/go-kit/kit/transport/http"
-	"github.com/gorilla/mux"
-	sgm "github.com/the-gigi/delinkcious/pkg/milvus_manager"
 	"log"
 	"net/http"
+
+	httptransport "github.com/go-kit/kit/transport/http"
+	"github.com/gorilla/mux"
+	sgm "github.com/yuan8180/delinkcious/pkg/milvus_manager"
 )
 
 var (
@@ -15,7 +16,7 @@ var (
 )
 
 func Run() {
-	store, err := sgm.NewMilvusStore("localhost", 27017)
+	store, err := sgm.NewMilvusStore("localhost:27017")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -36,9 +37,9 @@ func Run() {
 		encodeResponse,
 	)
 
-	listCollectionHandler := httptransport.NewServer(
-		makeListCollectionEndpoint(svc),
-		decodeListCollectionRequest,
+	listCollectionsHandler := httptransport.NewServer(
+		makeListCollectionsEndpoint(svc),
+		decodeListCollectionsRequest,
 		encodeResponse,
 	)
 
@@ -49,10 +50,10 @@ func Run() {
 	)
 
 	r := mux.NewRouter()
-	r.Methods("POST").Path("/createCollection/{collectionname}").Handler(createCollectionHandler)
-	r.Methods("POST").Path("/dropCollection/{collectionname}").Handler(dropCollectionHandler)
-	r.Methods("GET").Path("/listCollection").Handler(listCollectionHandler)
-	r.Methods("GET").Path("/hasCollection/{collectionname}").Handler(hasCollectionHandler)
+	r.Methods("POST").Path("/createCollection/{collname}").Handler(createCollectionHandler)
+	r.Methods("POST").Path("/dropCollection/{collname}").Handler(dropCollectionHandler)
+	r.Methods("GET").Path("/listCollections").Handler(listCollectionsHandler)
+	r.Methods("GET").Path("/hasCollection/{collname}").Handler(hasCollectionHandler)
 
 	log.Println("Listening on port 9090...")
 	log.Fatal(http.ListenAndServe(":9090", r))

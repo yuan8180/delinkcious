@@ -3,45 +3,36 @@ package service
 import (
 	"context"
 	"encoding/json"
-	"github.com/go-kit/kit/endpoint"
-	om "github.com/the-gigi/delinkcious/pkg/object_model"
 	"net/http"
+
+	"github.com/go-kit/kit/endpoint"
+	om "github.com/yuan8180/delinkcious/pkg/object_model"
 )
 
-type followRequest struct {
-	Followed string `json:"followed"`
-	Follower string `json:"follower"`
+type getByCollnameRequest struct {
+	Collname string `json:"collname"`
 }
 
-type followResponse struct {
+type createCollectionResponse struct {
 	Err string `json:"err"`
 }
 
-type unfollowRequest struct {
-	Followed string `json:"followed"`
-	Follower string `json:"follower"`
-}
-
-type unfollowResponse struct {
+type dropCollectionResponse struct {
 	Err string `json:"err"`
 }
 
-type getByUsernameRequest struct {
-	Username string `json:"username"`
+type listCollectionsResponse struct {
+	collections []string `json:"collections"`
+	Err         string   `json:"err"`
 }
 
-type getFollowersResponse struct {
-	Followers map[string]bool `json:"followers"`
-	Err       string          `json:"err"`
+type hasCollectionResponse struct {
+	collExists bool   `json:"collExists"`
+	Err        string `json:"err"`
 }
 
-type getFollowingResponse struct {
-	Following map[string]bool `json:"following"`
-	Err       string          `json:"err"`
-}
-
-func decodeFollowRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	var request followRequest
+func decodeCreateCollectionRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	var request getByCollnameRequest
 	err := json.NewDecoder(r.Body).Decode(&request)
 	if err != nil {
 		return nil, err
@@ -49,8 +40,8 @@ func decodeFollowRequest(_ context.Context, r *http.Request) (interface{}, error
 	return request, nil
 }
 
-func decodeUnfollowRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	var request unfollowRequest
+func decodeDropCollectionRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	var request getByCollnameRequest
 	err := json.NewDecoder(r.Body).Decode(&request)
 	if err != nil {
 		return nil, err
@@ -58,17 +49,12 @@ func decodeUnfollowRequest(_ context.Context, r *http.Request) (interface{}, err
 	return request, nil
 }
 
-func decodeGetFollowingRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	var request getByUsernameRequest
-	err := json.NewDecoder(r.Body).Decode(&request)
-	if err != nil {
-		return nil, err
-	}
-	return request, nil
+func decodeListCollectionsRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	return struct{}{}, nil
 }
 
-func decodeGetFollowersRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	var request getByUsernameRequest
+func decodeHasCollectionRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	var request getByCollnameRequest
 	err := json.NewDecoder(r.Body).Decode(&request)
 	if err != nil {
 		return nil, err
@@ -82,8 +68,8 @@ func encodeResponse(_ context.Context, w http.ResponseWriter, response interface
 
 func makeCreateCollectionEndpoint(svc om.MilvusManager) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(GetByCollectionNameRequest)
-		err := svc.CreateCollection(req.Collectionname)
+		req := request.(getByCollnameRequest)
+		err := svc.CreateCollection(req.Collname)
 		res := createCollectionResponse{}
 		if err != nil {
 			res.Err = err.Error()
@@ -94,8 +80,8 @@ func makeCreateCollectionEndpoint(svc om.MilvusManager) endpoint.Endpoint {
 
 func makeDropCollectionEndpoint(svc om.MilvusManager) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(GetByCollectionNameRequest)
-		err := svc.DropCollection(req.Collectionname)
+		req := request.(getByCollnameRequest)
+		err := svc.DropCollection(req.Collname)
 		res := dropCollectionResponse{}
 		if err != nil {
 			res.Err = err.Error()
@@ -104,11 +90,10 @@ func makeDropCollectionEndpoint(svc om.MilvusManager) endpoint.Endpoint {
 	}
 }
 
-func makeListCollectionEndpoint(svc om.MilvusManager) endpoint.Endpoint {
+func makeListCollectionsEndpoint(svc om.MilvusManager) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(listCollectionRequest)
-		collectionMap, err := svc.ListCollection{}
-                res := listCollectionResponse{Collections: collectionMap}
+		collections, err := svc.ListCollections()
+		res := listCollectionsResponse{collections: collections}
 		if err != nil {
 			res.Err = err.Error()
 		}
@@ -118,9 +103,9 @@ func makeListCollectionEndpoint(svc om.MilvusManager) endpoint.Endpoint {
 
 func makeHasCollectionEndpoint(svc om.MilvusManager) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(GetByCollectionNameRequest)
-		hasCollection, err := svc.HasCollection(req.Collectionname)
-		res := hasCollectionResponse{HasCollection: hasCollection}
+		req := request.(getByCollnameRequest)
+		collExists, err := svc.HasCollection(req.Collname)
+		res := hasCollectionResponse{collExists: collExists}
 		if err != nil {
 			res.Err = err.Error()
 		}

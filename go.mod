@@ -1,4 +1,4 @@
-module github.com/the-gigi/delinkcious
+module github.com/yuan8180/delinkcious
 
 go 1.19
 

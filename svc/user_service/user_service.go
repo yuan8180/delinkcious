@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	httptransport "github.com/go-kit/kit/transport/http"
-	sgm "github.com/the-gigi/delinkcious/pkg/user_manager"
+	sgm "github.com/yuan8180/delinkcious/pkg/user_manager"
 )
 
 func main() {
