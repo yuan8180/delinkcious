@@ -22,12 +22,12 @@ type dropCollectionResponse struct {
 }
 
 type listCollectionsResponse struct {
-	collections []string `json:"collections"`
+	Collections []string `json:"collections"`
 	Err         string   `json:"err"`
 }
 
 type hasCollectionResponse struct {
-	collExists bool   `json:"collExists"`
+	CollExists bool   `json:"collExists"`
 	Err        string `json:"err"`
 }
 
@@ -93,7 +93,7 @@ func makeDropCollectionEndpoint(svc om.MilvusManager) endpoint.Endpoint {
 func makeListCollectionsEndpoint(svc om.MilvusManager) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		collections, err := svc.ListCollections()
-		res := listCollectionsResponse{collections: collections}
+		res := listCollectionsResponse{Collections: collections}
 		if err != nil {
 			res.Err = err.Error()
 		}
@@ -105,7 +105,7 @@ func makeHasCollectionEndpoint(svc om.MilvusManager) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(getByCollnameRequest)
 		collExists, err := svc.HasCollection(req.Collname)
-		res := hasCollectionResponse{collExists: collExists}
+		res := hasCollectionResponse{CollExists: collExists}
 		if err != nil {
 			res.Err = err.Error()
 		}

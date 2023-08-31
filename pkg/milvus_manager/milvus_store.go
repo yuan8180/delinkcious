@@ -2,6 +2,7 @@ package social_graph_manager
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	_ "github.com/lib/pq"
@@ -23,7 +24,6 @@ func NewMilvusStore(milvusAddr string) (store *MilvusStore, err error) {
 		log.Fatalf("failed to connect to milvus, err: %v", err)
 		return
 	}
-	defer c.Close()
 
 	store = &MilvusStore{milvusCtx, c}
 	return
@@ -50,6 +50,7 @@ func (s *MilvusStore) CreateCollection(collname string) (err error) {
 }
 
 func (s *MilvusStore) DropCollection(collname string) (err error) {
+	fmt.Println("start drop")
 	collExists, err := s.HasCollection(collname)
 	if !collExists {
 		log.Println("no specified collection was not found")
