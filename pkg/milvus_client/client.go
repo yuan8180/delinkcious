@@ -13,7 +13,7 @@ import (
 	om "github.com/yuan8180/delinkcious/pkg/object_model"
 )
 
-func NewClient(baseURL string) (om.SocialGraphManager, error) {
+func NewClient(baseURL string) (om.MilvusManager, error) {
 	// Quickly sanitize the instance string.
 	if !strings.HasPrefix(baseURL, "http") {
 		baseURL = "http://" + baseURL

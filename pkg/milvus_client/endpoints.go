@@ -83,7 +83,7 @@ func (s EndpointSet) ListCollections() (collections []string, err error) {
 		err = errors.New(response.Err)
 	}
 	for i, collection := range response.Collections {
-		collections[i] = collection.Name
+		collections[i] = collection
 	}
 	return
 }
