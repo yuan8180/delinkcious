@@ -22,8 +22,8 @@ type dropCollectionResponse struct {
 }
 
 type listCollectionsResponse struct {
-	Collections []string `json:"collections"`
-	Err         string   `json:"err"`
+	Collections map[string]bool `json:"collections"`
+	Err         string          `json:"err"`
 }
 
 type hasCollectionResponse struct {

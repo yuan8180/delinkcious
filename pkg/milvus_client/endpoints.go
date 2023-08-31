@@ -59,8 +59,8 @@ func (s EndpointSet) DropCollection(collname string) (err error) {
 }
 
 type listCollectionsResponse struct {
-	Collections []string `json:"collections"`
-	Err         string   `json:"err"`
+	Collections map[string]bool `json:"collections"`
+	Err         string          `json:"err"`
 }
 
 func decodeListCollectionsResponse(_ context.Context, r *http.Response) (interface{}, error) {
@@ -72,7 +72,8 @@ func decodeListCollectionsResponse(_ context.Context, r *http.Response) (interfa
 	return resp, err
 }
 
-func (s EndpointSet) ListCollections() (collections []string, err error) {
+func (s EndpointSet) ListCollections() (collections map[string]bool, err error) {
+	collections = map[string]bool{}
 	resp, err := s.ListCollectionsEndpoint(context.Background(), struct{}{})
 	if err != nil {
 		return
@@ -83,7 +84,7 @@ func (s EndpointSet) ListCollections() (collections []string, err error) {
 		err = errors.New(response.Err)
 	}
 	for i, collection := range response.Collections {
-		collections[i] = collection
+		collections[collection.Name] = true
 	}
 	return
 }

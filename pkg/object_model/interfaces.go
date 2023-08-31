@@ -34,6 +34,6 @@ type LinkManagerEvents interface {
 type MilvusManager interface {
 	CreateCollection(collname string) error
 	DropCollection(collname string) error
-	ListCollections() ([]string, error)
+	ListCollections() (map[string]bool, error)
 	HasCollection(collname string) (bool, error)
 }

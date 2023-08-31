@@ -35,7 +35,7 @@ func (m *MilvusManager) DropCollection(collname string) (err error) {
 	return m.store.DropCollection(collname)
 }
 
-func (m *MilvusManager) ListCollections() ([]string, error) {
+func (m *MilvusManager) ListCollections() (map[string]bool, error) {
 	return m.store.ListCollections()
 }
 

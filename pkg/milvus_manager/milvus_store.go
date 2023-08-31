@@ -65,13 +65,14 @@ func (s *MilvusStore) DropCollection(collname string) (err error) {
 	return
 }
 
-func (s *MilvusStore) ListCollections() (collections []string, err error) {
+func (s *MilvusStore) ListCollections() (collections map[string]bool, err error) {
+	collections = map[string]bool{}
 	colls, err := s.c.ListCollections(s.ctx)
 	if err != nil {
 		log.Fatal("failed to list collections:", err.Error())
 	}
-	for i, collection := range colls {
-		collections[i] = collection.Name
+	for _, collection := range colls {
+		collections[collection.Name] = true
 	}
 
 	return

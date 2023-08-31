@@ -20,10 +20,7 @@ func main() {
 
 	collections, err := cli.ListCollections()
 	check(err)
-	log.Print("1list collections:")
-	for _, collection := range collections {
-		log.Print(collection)
-	}
+	log.Print("1list collections:", collections)
 
 	collExists, err := cli.HasCollection("milvus01")
 	check(err)
@@ -32,17 +29,14 @@ func main() {
 	err = cli.CreateCollection("milvus01")
 	check(err)
 
-	collections, err := cli.ListCollections()
+	collections, err = cli.ListCollections()
 	check(err)
-	log.Print("2list collections:")
-	for _, collection := range collections {
-		log.Print(collection)
-	}
+	log.Print("2list collections:", collections)
 
 	err = cli.DropCollection("milvus01")
 	check(err)
 
-	collExists, err := cli.HasCollection("milvus01")
+	collExists, err = cli.HasCollection("milvus01")
 	check(err)
 	log.Print("2whether the collection is exits:", collExists)
 
