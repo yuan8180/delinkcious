@@ -73,7 +73,6 @@ func decodeListCollectionsResponse(_ context.Context, r *http.Response) (interfa
 }
 
 func (s EndpointSet) ListCollections() (collections map[string]bool, err error) {
-	collections = map[string]bool{}
 	resp, err := s.ListCollectionsEndpoint(context.Background(), struct{}{})
 	if err != nil {
 		return
@@ -83,9 +82,7 @@ func (s EndpointSet) ListCollections() (collections map[string]bool, err error) 
 	if response.Err != "" {
 		err = errors.New(response.Err)
 	}
-	for i, collection := range response.Collections {
-		collections[collection.Name] = true
-	}
+	collections = response.Collections
 	return
 }
 
