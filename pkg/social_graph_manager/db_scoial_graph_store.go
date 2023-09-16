@@ -3,10 +3,9 @@ package social_graph_manager
 import (
 	"database/sql"
 	"errors"
-	"fmt"
-
 	sq "github.com/Masterminds/squirrel"
 	_ "github.com/lib/pq"
+	"github.com/the-gigi/delinkcious/pkg/db_util"
 )
 
 type DbSocialGraphStore struct {
@@ -14,10 +13,10 @@ type DbSocialGraphStore struct {
 	sb sq.StatementBuilderType
 }
 
+const dbName = "social_graph_manager"
+
 func NewDbSocialGraphStore(host string, port int, username string, password string) (store *DbSocialGraphStore, err error) {
-	mask := "host=%s port=%d user=%s password=%s dbname=social_graph_manager sslmode=disable"
-	dcn := fmt.Sprintf(mask, host, port, username, password)
-	db, err := sql.Open("postgres", dcn)
+	db, err := db_util.EnsureDB(host, port, username, password, dbName)
 	if err != nil {
 		return
 	}

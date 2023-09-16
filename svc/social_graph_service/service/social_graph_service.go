@@ -1,28 +1,48 @@
 package service
 
 import (
-	"errors"
 	httptransport "github.com/go-kit/kit/transport/http"
 	"github.com/gorilla/mux"
-	sgm "github.com/yuan8180/delinkcious/pkg/social_graph_manager"
+	sgm "github.com/the-gigi/delinkcious/pkg/social_graph_manager"
 	"log"
 	"net/http"
+	"os"
+	"strconv"
 )
 
-var (
-	// return when an expected path variable is missing.
-	BadRoutingError = errors.New("inconsistent mapping between route and handler")
-)
+func check(err error) {
+	if err != nil {
+		log.Fatal(err)
+	}
+}
 
 func Run() {
-	store, err := sgm.NewDbSocialGraphStore("localhost", 5432, "postgres", "postgres")
-	if err != nil {
-		log.Fatal(err)
+	log.Println("Service started...")
+	dbHost := os.Getenv("SOCIAL_GRAPH_DB_SERVICE_HOST")
+	if dbHost == "" {
+		dbHost = "localhost"
 	}
+
+	dbPortStr := os.Getenv("SOCIAL_GRAPH_DB_SERVICE_PORT")
+	if dbPortStr == "" {
+		dbPortStr = "5432"
+	}
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "9090"
+	}
+
+	log.Println("DB host:", dbHost, "DB port:", dbPortStr)
+
+	dbPort, err := strconv.Atoi(dbPortStr)
+	check(err)
+
+	store, err := sgm.NewDbSocialGraphStore(dbHost, dbPort, "postgres", "postgres")
+	check(err)
+
 	svc, err := sgm.NewSocialGraphManager(store)
-	if err != nil {
-		log.Fatal(err)
-	}
+	check(err)
 
 	followHandler := httptransport.NewServer(
 		makeFollowEndpoint(svc),
@@ -54,6 +74,6 @@ func Run() {
 	r.Methods("GET").Path("/following/{username}").Handler(getFollowingHandler)
 	r.Methods("GET").Path("/followers/{username}").Handler(getFollowersHandler)
 
-	log.Println("Listening on port 9090...")
-	log.Fatal(http.ListenAndServe(":9090", r))
+	log.Printf("Listening on port %s...\n", port)
+	log.Fatal(http.ListenAndServe(":"+port, r))
 }

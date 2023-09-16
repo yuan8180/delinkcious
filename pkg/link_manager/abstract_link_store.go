@@ -1,7 +1,7 @@
 package link_manager
 
 import (
-	om "github.com/yuan8180/delinkcious/pkg/object_model"
+	om "github.com/the-gigi/delinkcious/pkg/object_model"
 )
 
 type LinkStore interface {

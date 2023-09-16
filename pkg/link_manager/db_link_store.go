@@ -2,26 +2,26 @@ package link_manager
 
 import (
 	"errors"
-	"fmt"
+	"github.com/the-gigi/delinkcious/pkg/db_util"
+	om "github.com/the-gigi/delinkcious/pkg/object_model"
 	"time"
 
-	om "github.com/yuan8180/delinkcious/pkg/object_model"
-
 	"database/sql"
-
 	sq "github.com/Masterminds/squirrel"
 	_ "github.com/lib/pq"
 )
+
+const pageSize = 10
 
 type DbLinkStore struct {
 	db *sql.DB
 	sb sq.StatementBuilderType
 }
 
+const dbName = "link_manager"
+
 func NewDbLinkStore(host string, port int, username string, password string) (store *DbLinkStore, err error) {
-	mask := "host=%s port=%d user=%s password=%s dbname=link_manager sslmode=disable"
-	dcn := fmt.Sprintf(mask, host, port, username, password)
-	db, err := sql.Open("postgres", dcn)
+	db, err := db_util.EnsureDB(host, port, username, password, dbName)
 	if err != nil {
 		return
 	}
@@ -46,21 +46,20 @@ func createSchema(db *sql.DB) (err error) {
         CREATE TABLE IF NOT EXISTS links (
           id SERIAL   PRIMARY KEY,
 		  username    TEXT,
-          url TEXT    UNIQUE NOT NULL,
-          title TEXT  UNIQUE NOT NULL,
+          url TEXT    NOT NULL,
+          title TEXT  NOT NULL,
 		  description TEXT,
 		  created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 		  updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP          
         );
-		CREATE UNIQUE INDEX IF NOT EXISTS links_username_idx ON links(username);
-
+		CREATE INDEX IF NOT EXISTS links_username_idx ON links(username);
 
         CREATE TABLE IF NOT EXISTS tags (
           id SERIAL PRIMARY KEY,
           link_id   INTEGER REFERENCES links(id) ON DELETE CASCADE,			
           name      TEXT		  
         );
-        CREATE UNIQUE INDEX IF NOT EXISTS tags_name_idx ON tags(name);
+        CREATE INDEX IF NOT EXISTS tags_name_idx ON tags(name);
     `
 
 	_, err = db.Exec(schema)
@@ -68,8 +67,11 @@ func createSchema(db *sql.DB) (err error) {
 }
 
 func (s *DbLinkStore) GetLinks(request om.GetLinksRequest) (result om.GetLinksResult, err error) {
-	q := s.sb.Select("*").From("links").Join("tags ON links.id = tags.link_id")
-	q = q.Where(sq.Eq{"username": request.Username}).OrderBy("created_at")
+	q := s.sb.Select("*").From("links")
+	if request.Tag != "" {
+		q = q.Join("tags ON links.id = tags.link_id")
+	}
+	q = q.Where(sq.Eq{"username": request.Username}).OrderBy("created_at").Limit(pageSize)
 	if request.StartToken != "" {
 		var createdAt time.Time
 		createdAt, err = time.Parse(time.RFC3339, request.StartToken)
@@ -96,7 +98,11 @@ func (s *DbLinkStore) GetLinks(request om.GetLinksRequest) (result om.GetLinksRe
 	var tag_name string
 	var username string
 	for rows.Next() {
-		err = rows.Scan(&id, &username, &link.Url, &link.Title, &link.Description, &link.CreatedAt, &link.UpdatedAt, &tag_id, &id, &tag_name)
+		if request.Tag != "" {
+			err = rows.Scan(&id, &username, &link.Url, &link.Title, &link.Description, &link.CreatedAt, &link.UpdatedAt, &tag_id, &id, &tag_name)
+		} else {
+			err = rows.Scan(&id, &username, &link.Url, &link.Title, &link.Description, &link.CreatedAt, &link.UpdatedAt)
+		}
 		if err != nil {
 			return
 		}
@@ -108,7 +114,9 @@ func (s *DbLinkStore) GetLinks(request om.GetLinksRequest) (result om.GetLinksRe
 		}
 	}
 
-	result.NextPageToken = link.CreatedAt.UTC().Format(time.RFC3339)
+	if len(result.Links) == pageSize {
+		result.NextPageToken = link.CreatedAt.UTC().Format(time.RFC3339)
+	}
 	return
 }
 

@@ -25,15 +25,12 @@ type SocialGraphManager interface {
 	//KickFollower(followed string, follower string) error
 }
 
+type NewsManager interface {
+	GetNews(request GetNewsRequest) (GetNewsResult, error)
+}
+
 type LinkManagerEvents interface {
 	OnLinkAdded(username string, link *Link)
 	OnLinkUpdated(username string, link *Link)
 	OnLinkDeleted(username string, url string)
-}
-
-type MilvusManager interface {
-	CreateCollection(collname string) error
-	DropCollection(collname string) error
-	ListCollections() (map[string]bool, error)
-	HasCollection(collname string) (bool, error)
 }

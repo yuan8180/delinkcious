@@ -4,14 +4,17 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	httptransport "github.com/go-kit/kit/transport/http"
+	"github.com/the-gigi/delinkcious/pkg/auth_util"
+	om "github.com/the-gigi/delinkcious/pkg/object_model"
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
-
-	httptransport "github.com/go-kit/kit/transport/http"
-	om "github.com/yuan8180/delinkcious/pkg/object_model"
 )
+
+const SERVICE_NAME = "social-graph-manager"
 
 func NewClient(baseURL string) (om.SocialGraphManager, error) {
 	// Quickly sanitize the instance string.
@@ -47,8 +50,8 @@ func NewClient(baseURL string) (om.SocialGraphManager, error) {
 		encodeGetByUsernameRequest,
 		decodeGetFollowersResponse).Endpoint()
 
-	// Returning the endpoint.Set as a service.Service relies on the
-	// endpoint.Set implementing the Service methods. That's just a simple bit
+	// Returning the EndpointSet as an interface relies on the
+	// EndpointSet implementing the Service methods. That's just a simple bit
 	// of glue code.
 	return EndpointSet{
 		FollowEndpoint:       followEndpoint,
@@ -72,13 +75,19 @@ func encodeHTTPGenericRequest(_ context.Context, r *http.Request, request interf
 		return err
 	}
 	r.Body = ioutil.NopCloser(&buf)
+
+	if os.Getenv("DELINKCIOUS_MUTUAL_AUTH") != "false" {
+		token := auth_util.GetToken(SERVICE_NAME)
+		r.Header["Delinkcious-Caller-Token"] = []string{token}
+	}
+
 	return nil
 }
 
-// Extract the username from the incmoing request and add it to the path
+// Extract the username from the incoming request and add it to the path
 func encodeGetByUsernameRequest(ctx context.Context, req *http.Request, request interface{}) error {
 	r := request.(getByUserNameRequest)
-	username := url.QueryEscape(r.Username)
+	username := url.PathEscape(r.Username)
 	req.URL.Path += "/" + username
 	return encodeHTTPGenericRequest(ctx, req, request)
 }

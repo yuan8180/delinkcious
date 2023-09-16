@@ -4,21 +4,24 @@ import (
 	sq "github.com/Masterminds/squirrel"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	om "github.com/yuan8180/delinkcious/pkg/object_model"
+	"github.com/the-gigi/delinkcious/pkg/db_util"
+	om "github.com/the-gigi/delinkcious/pkg/object_model"
 )
 
 var _ = Describe("user manager tests with DB ", func() {
 	var userStore *DbUserStore
 	var userManager om.UserManager
-	var err error
 	var deleteAll = func() {
 		sq.Delete("users").RunWith(userStore.db).Exec()
 		sq.Delete("sessions").RunWith(userStore.db).Exec()
 	}
 
 	BeforeSuite(func() {
-		userStore, err = NewDbUserStore("localhost", 5432, "postgres", "postgres")
+		dbHost, dbPort, err := db_util.GetDbEndpoint("user")
 		Ω(err).Should(BeNil())
+		userStore, err = NewDbUserStore(dbHost, dbPort, "postgres", "postgres")
+		Ω(err).Should(BeNil())
+		Ω(userStore).ShouldNot(BeNil())
 		userManager, err = NewUserManager(userStore)
 		Ω(err).Should(BeNil())
 		Ω(userManager).ShouldNot(BeNil())

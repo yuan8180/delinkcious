@@ -3,20 +3,26 @@ package link_manager
 import (
 	"errors"
 	"fmt"
+	om "github.com/the-gigi/delinkcious/pkg/object_model"
 	"regexp"
 	"time"
-
-	om "github.com/yuan8180/delinkcious/pkg/object_model"
 )
 
 // User links are a map of url:TaggedLink
 type UserLinks map[string]*om.Link
 
 // Link store is a map of username:UserLinks
-type InMemoryLinkStore map[string]UserLinks
+type InMemoryLinkStore struct {
+	links map[string]UserLinks
+}
+
+func NewInMemoryLinkStore() LinkStore {
+	return &InMemoryLinkStore{map[string]UserLinks{}}
+}
 
 func (m *InMemoryLinkStore) GetLinks(request om.GetLinksRequest) (result om.GetLinksResult, err error) {
-	userLinks := (*m)[request.Username]
+	result.Links = []om.Link{}
+	userLinks := m.links[request.Username]
 	if userLinks == nil {
 		return
 	}
@@ -82,16 +88,17 @@ func (m *InMemoryLinkStore) AddLink(request om.AddLinkRequest) (link *om.Link, e
 	}
 
 	if request.Username == "" {
-		err = errors.New("User name can't be empty")
+		err = errors.New("user name can't be empty")
 		return
 	}
 
-	userLinks := (*m)[request.Username]
+	userLinks := m.links[request.Username]
 	if userLinks == nil {
-		userLinks = UserLinks{}
+		m.links[request.Username] = UserLinks{}
+		userLinks = m.links[request.Username]
 	} else {
 		if userLinks[request.Url] != nil {
-			msg := fmt.Sprintf("User %s already has a link for %s", request.Username, request.Url)
+			msg := fmt.Sprintf("user %s already has a link for %s", request.Username, request.Url)
 			err = errors.New(msg)
 			return
 		}
@@ -106,11 +113,12 @@ func (m *InMemoryLinkStore) AddLink(request om.AddLinkRequest) (link *om.Link, e
 		Tags:        request.Tags,
 	}
 	userLinks[request.Url] = link
+
 	return
 }
 
 func (m *InMemoryLinkStore) UpdateLink(request om.UpdateLinkRequest) (link *om.Link, err error) {
-	userLinks := (*m)[request.Username]
+	userLinks := m.links[request.Username]
 	if userLinks == nil || userLinks[request.Url] == nil {
 		msg := fmt.Sprintf("User %s doesn't have a link for %s", request.Username, request.Url)
 		err = errors.New(msg)
@@ -147,12 +155,12 @@ func (m *InMemoryLinkStore) DeleteLink(username string, url string) error {
 		return errors.New("User name can't be empty")
 	}
 
-	userLinks := (*m)[username]
+	userLinks := m.links[username]
 	if userLinks == nil || userLinks[url] == nil {
 		msg := fmt.Sprintf("User %s doesn't have a link for %s", username, url)
 		return errors.New(msg)
 	}
 
-	delete((*m)[username], url)
+	delete(m.links[username], url)
 	return nil
 }

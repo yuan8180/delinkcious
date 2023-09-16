@@ -2,14 +2,11 @@ package main
 
 import (
 	"context"
-	"database/sql"
-	"fmt"
-	"log"
-	"os"
-	"os/exec"
-
 	_ "github.com/lib/pq"
-	"github.com/yuan8180/delinkcious/pkg/social_graph_client"
+	"github.com/the-gigi/delinkcious/pkg/db_util"
+	"github.com/the-gigi/delinkcious/pkg/social_graph_client"
+	. "github.com/the-gigi/delinkcious/pkg/test_util"
+	"log"
 )
 
 func check(err error) {
@@ -18,55 +15,21 @@ func check(err error) {
 	}
 }
 
-func runDB() {
-	// Launch the DB if not running
-	out, err := exec.Command("docker", "ps", "-f", "name=postgres", "--format", "{{.Names}}").CombinedOutput()
+func initDB() {
+	db, err := db_util.RunLocalDB("social_graph_manager")
 	check(err)
 
-	s := string(out)
-	log.Print(s)
-
-	if s == "" {
-		_, err := exec.Command("docker", "restart", "postgres").CombinedOutput()
-		check(err)
-	}
-
-	// Clear the DB
-	mask := "host=%s port=%d user=%s password=%s dbname=social_graph_manager sslmode=disable"
-	dcn := fmt.Sprintf(mask, "localhost", 5432, "postgres", "postgres")
-	db, err := sql.Open("postgres", dcn)
-	if err != nil {
-		return
-	}
-
-	_, err = db.Exec("DELETE from social_graph")
+	// Ignore if table doesn't exist (will be created by service)
+	err = db_util.DeleteFromTableIfExist(db, "social_graph")
 	check(err)
-}
-
-func runServer(ctx context.Context) {
-	// Build the server if needed
-	_, err := os.Stat("./social_graph_service")
-	if os.IsNotExist(err) {
-		out, err := exec.Command("go", "build", ".").CombinedOutput()
-		log.Println(out)
-		check(err)
-	}
-
-	cmd := exec.CommandContext(ctx, "./social_graph_service")
-	err = cmd.Start()
-	check(err)
-}
-
-func killServer(ctx context.Context) {
-	ctx.Done()
 }
 
 func main() {
-	runDB()
+	initDB()
 
-	//ctx := context.Background()
-	//defer killServer(ctx)
-	//runServer(ctx)
+	ctx := context.Background()
+	defer KillServer(ctx)
+	RunService(ctx, ".", "social_graph_service")
 
 	// Run some tests with the client
 	cli, err := social_graph_client.NewClient("localhost:9090")

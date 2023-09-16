@@ -4,7 +4,8 @@ import (
 	sq "github.com/Masterminds/squirrel"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	om "github.com/yuan8180/delinkcious/pkg/object_model"
+	"github.com/the-gigi/delinkcious/pkg/db_util"
+	om "github.com/the-gigi/delinkcious/pkg/object_model"
 )
 
 var _ = Describe("social graph manager tests with DB", func() {
@@ -17,7 +18,9 @@ var _ = Describe("social graph manager tests with DB", func() {
 	}
 
 	BeforeSuite(func() {
-		socialGraphStore, err = NewDbSocialGraphStore("localhost", 5432, "postgres", "postgres")
+		dbHost, dbPort, err := db_util.GetDbEndpoint("social_graph")
+		Ω(err).Should(BeNil())
+		socialGraphStore, err = NewDbSocialGraphStore(dbHost, dbPort, "postgres", "postgres")
 		Ω(err).Should(BeNil())
 		socialGraphManager, err = NewSocialGraphManager(socialGraphStore)
 		Ω(err).Should(BeNil())
